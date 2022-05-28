@@ -1,5 +1,4 @@
 from django import views
-from yaml import serialize
 from .serializers import ProductSerializer
 from rest_framework.filters import SearchFilter,OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 from rest_framework import status,generics,viewsets
 from rest_framework.pagination import PageNumberPagination
 from .models import Product
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from .pagination import CustomPagination
 
@@ -21,9 +21,12 @@ class ProductListAPIVIew(generics.ListAPIView):
     search_fields = ['Title', 'Category','Shop_id']
     ordering_fields = ['Title','Category']
     pagination_class = CustomPagination
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, *args, **kwargs):
         ...
+        
         queryset = Product.objects.all()
         filter_backends = self.filter_queryset(queryset)
         serializer = ProductSerializer(filter_backends, many=True)
@@ -33,6 +36,9 @@ class ProductListAPIVIew(generics.ListAPIView):
 class ProductRetriveAPIVIew(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
 
 class ProductCreateAPIView(generics.GenericAPIView):
     # queryset = Product.objects.all()
@@ -57,6 +63,8 @@ class ProductCreateAPIView(generics.GenericAPIView):
     #     return Response(serializer.data,status=status.HTTP_200_OK )
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self,request):
         serializer  = ProductSerializer(data=request.data,context={ 'request': self.request })

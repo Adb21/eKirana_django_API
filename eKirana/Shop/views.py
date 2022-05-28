@@ -1,7 +1,7 @@
 from .serializers import ShopSerializer
 from rest_framework.filters import SearchFilter,OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status,generics
 from rest_framework.response import Response
@@ -15,6 +15,8 @@ class ShopAPIView(generics.GenericAPIView):
     filter_backends = [DjangoFilterBackend,SearchFilter,OrderingFilter]
     search_fields = ['Shop_Name', 'Locality','State','Pincode']
     ordering_fields = ['State','Locality']
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self,request,pk=None):
         id=pk
