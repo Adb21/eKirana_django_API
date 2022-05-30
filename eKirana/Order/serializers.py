@@ -1,8 +1,10 @@
 from genericpath import exists
 from rest_framework import serializers
-from Product.serializers import ProductSerializer
+# from Product.serializers import ProductSerializer
+# from Shop.serializers import ShopSerializer
 from Profile.models import Profile
-from .models import Cart,CartItems
+from Order.models import Order
+from .models import Cart,CartItems, OrderItems
 from Profile.serializers import UserSerializer
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
@@ -35,10 +37,9 @@ class CartSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(msg)
         return super().validate(attrs)
 
-
 class CartItemSerializer(serializers.ModelSerializer):
     Cart = CartSerializer
-    Item = ProductSerializer
+    Item = "Product.ProductSerializer"
     Quantity = serializers.IntegerField(max_value=10)
 
     class Meta :
@@ -79,6 +80,26 @@ class CartItemSerializer(serializers.ModelSerializer):
             item = CartItems.objects.create(Cart=cart,Item=item_data,Quantity=qty)
         return item
 
+class OrderSerializer(serializers.ModelSerializer):
+    User = UserSerializer
+    class Meta :
+        model = Order
+        #fields = '__all__'
+        exclude = ['User']
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    Order = OrderSerializer
+    Item = "Product.ProductSerializer"
+    Seller = "Shop.ShopSerializer"
+    Quantity = serializers.IntegerField(max_value=10)
+
+    class Meta :
+        model = OrderItems
+        #fields = '__all__'
+        exclude = ['id']
+        #extra_kwargs = {'Quantity': {'required': True}} 
+
+
 def get_Userid(request):
     try :
         token = get_authorization_header(request).decode('utf-8')
@@ -91,17 +112,31 @@ def get_Userid(request):
     return user_id
 
 def get_Cart(uid):
-    if Cart.objects.filter(User_id=uid).exists():
-        cart = Cart.objects.get(User_id=uid)
+    if Cart.objects.filter(User=uid).exists():
+        cart = Cart.objects.get(User=uid)
         return cart
     else:
-        # msg = {"error":"User with Cart Not Found"}
-        # raise serializers.ValidationError(msg)
-        # cart = Cart(User=uid)
-        # cart.save()
         return -1
 
 def checkQty(qty):
     if qty < -1:
         return False
     return True
+
+def orderNow(uid):
+    if Cart.objects.filter(User=uid).exists():
+        ct = Cart.objects.get(User=uid)
+        ct.Status = True
+        ct.save()
+    if Order.objects.filter(User=uid).exists():
+        od = Order.objects.filter(User=uid)
+    Cart.objects.filter(User=uid).update(Status=False)
+    return od[len(od)-1]
+
+
+def getUserType(uid):
+    if Profile.objects.filter(User=uid).exists():
+        profile = Profile.objects.get(User=uid)
+        return profile.User_Type
+    msg = {"error":"User Not Found"}
+    raise serializers.ValidationError(msg)

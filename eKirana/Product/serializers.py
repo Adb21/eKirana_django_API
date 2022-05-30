@@ -1,6 +1,7 @@
 import imp
 from rest_framework import serializers
 from .models import Product
+from Shop.serializers import ShopSerializer
 from drf_queryfields import QueryFieldsMixin
 from Profile.models import Profile
 from Shop.models import Shopkeeper
@@ -13,14 +14,14 @@ from rest_framework.authentication import get_authorization_header
 
 #QueryFieldsMixin : helps in retriving selected data 
 class ProductSerializer(QueryFieldsMixin,serializers.ModelSerializer):
-
+    Shop = Shopkeeper
     class Meta :
         model = Product
-        exclude = ['Shop']
+        exclude = ['Stock']
         #fields = '__all__'
-        extra_kwargs = {
-            'Shop_id': {'write_only': True},
-        }
+        # extra_kwargs = {
+        #     'Shop_id': {'write_only': True},
+        # }
 
     def get_Userid(self,request):
         try :
@@ -47,9 +48,7 @@ class ProductSerializer(QueryFieldsMixin,serializers.ModelSerializer):
             if not Shopkeeper.objects.filter(User=uid).exists():
                 msg = {"error":"Shop with user not Found. Please register Shop first."}
                 raise serializers.ValidationError(msg)
-            shopkeeper =  Shopkeeper.objects.get(User=uid)
-            attrs["Shop_id"] = shopkeeper.id
-                        
+
         return super().validate(attrs)
 
 

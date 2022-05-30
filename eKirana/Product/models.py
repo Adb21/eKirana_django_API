@@ -1,7 +1,5 @@
 from sre_constants import CHCODES
 from django.db import models
-from Shop.models import Shopkeeper
-
 # Create your models here.
 QTY_TYPE = (
     (0, "Kg"), (1, "Litre"), (3, "Piece")
@@ -19,7 +17,7 @@ class Product(models.Model):
     Qty_Type = models.IntegerField(choices=QTY_TYPE)
     Image = models.ImageField(upload_to="product/images",default='product/images/sample.jpeg')
     Stock = models.IntegerField(default=0)
-    Shop = models.ForeignKey(Shopkeeper, on_delete=models.PROTECT)
+    Shop = models.ForeignKey("Shop.Shopkeeper", on_delete=models.PROTECT)
     
     def __str__(self):
         return str(self.Title)
