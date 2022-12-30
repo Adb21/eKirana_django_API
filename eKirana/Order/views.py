@@ -93,10 +93,12 @@ class OrderListAPIView(APIView):
         if id is not None:
             if Order.objects.filter(User=uid,id=id).exists():
                 orderitems = OrderItems.objects.filter(Order=id)
+                rfid = Order.objects.get(id=id)
                 serializer = OrderItemSerializer(orderitems,many=True)
                 return Response(
                                 {
                                     "order ID":id,
+                                    "order Ref-ID":rfid.RefrenceID,
                                     "order details": serializer.data,
                                 },status=status.HTTP_200_OK 
                             )
@@ -106,7 +108,6 @@ class OrderListAPIView(APIView):
                                 },status=status.HTTP_200_OK 
                             )
         order = Order.objects.filter(User=uid)
-        print(order)
         # oi = OrderItems.objects.filter(Order = order)
         # serializer = OrderItemSerializer(oi,many=True)
         serializer = OrderSerializer(order,many=True)

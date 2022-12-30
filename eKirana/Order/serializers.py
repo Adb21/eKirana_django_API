@@ -1,7 +1,9 @@
 from genericpath import exists
 from rest_framework import serializers
+from Product.models import Product
 # from Product.serializers import ProductSerializer
 # from Shop.serializers import ShopSerializer
+from Shop.models import Shopkeeper
 from Profile.models import Profile
 from Order.models import Order
 from .models import Cart,CartItems, OrderItems
@@ -15,6 +17,7 @@ from rest_framework.authentication import get_authorization_header
 #QueryFieldsMixin : helps in retriving selected data 
 class CartSerializer(serializers.ModelSerializer):
     User = UserSerializer
+    
     class Meta :
         model = Cart
         fields = '__all__'
@@ -41,12 +44,18 @@ class CartItemSerializer(serializers.ModelSerializer):
     Cart = CartSerializer
     Item = "Product.ProductSerializer"
     Quantity = serializers.IntegerField(max_value=10)
+    ItemName = serializers.SerializerMethodField('get_itemname')
 
+    def get_itemname(self,obj):
+        itemname = Product.objects.get(id=obj.Item.id)
+        return itemname.Title
+        
     class Meta :
         model = CartItems
         # fields = '__all__'
         exclude = ['Cart']
         extra_kwargs = {'Quantity': {'required': True}} 
+        read_only_fields = ['ItemName']
 
 
     def create(self, validated_data):
@@ -82,6 +91,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     User = UserSerializer
+
     class Meta :
         model = Order
         #fields = '__all__'
@@ -92,6 +102,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
     Item = "Product.ProductSerializer"
     Seller = "Shop.ShopSerializer"
     Quantity = serializers.IntegerField(max_value=10)
+    ItemName = serializers.SerializerMethodField('get_itemname')
+    SellerName = serializers.SerializerMethodField('get_sellername')
+
+    def get_itemname(self,obj):
+        itemname = Product.objects.get(id=obj.Item.id)
+        return itemname.Title
+
+    def get_sellername(self,obj):
+        itemname = Shopkeeper.objects.get(id=obj.Seller.id)
+        return itemname.Shop_Name
 
     class Meta :
         model = OrderItems

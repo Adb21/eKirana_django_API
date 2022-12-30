@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-d#_yh((912nrj*n3q$639y%w0hxjw=lyn_a9#fnjx2io0kgv==
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS =  ["localhost","*","127.0.0.1"]
 
 #AUTHENTICATION
 AUTHENTICATION_BACKENDS = ['Profile.backends.EmailBackend'] # new
@@ -46,7 +46,9 @@ INSTALLED_APPS = [
     'Order',
     'rest_framework',
     'django_filters',
-    'rest_framework_simplejwt'
+    'rest_framework_simplejwt',
+    'drf_spectacular',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -57,7 +59,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'eKirana.urls'
 
@@ -77,7 +82,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'eKirana.wsgi.application'
+WSGI_APPLICATION = 'eKirana.wsgi_windows.application'
 
 
 # Database
@@ -137,7 +142,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT=os.path.join(BASE_DIR, 'static')
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -161,7 +170,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         # 'anon': '100/day',
-        # 'user': '1000/day'
+        'user': '1000/day'
     },
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -204,8 +213,8 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Students API',
-    'DESCRIPTION': 'Students description',
+    'TITLE': 'ekirana APIs',
+    'DESCRIPTION': 'author : Aditya Bhosle',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS

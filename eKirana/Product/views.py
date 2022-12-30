@@ -1,4 +1,6 @@
+import imp
 from django import views
+from django.shortcuts import HttpResponse
 from .serializers import ProductSerializer
 from rest_framework.filters import SearchFilter,OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,15 +12,16 @@ from .models import Product
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from .pagination import CustomPagination
-
+import asyncio
+import time
 
 # Create your views here.
-class ProductListAPIVIew(generics.ListAPIView):
+class ProductListAPIView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend,SearchFilter,OrderingFilter]
-    filterset_fields = ['Category','Shop_id']
-    search_fields = ['Title', 'Category','Shop_id']
+    filterset_fields = ['Category','Shop']
+    search_fields = ['Title','Category']
     ordering_fields = ['Title','Category']
     pagination_class = CustomPagination
     authentication_classes = [JWTAuthentication]
@@ -33,7 +36,7 @@ class ProductListAPIVIew(generics.ListAPIView):
         page = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(page)
 
-class ProductRetriveAPIVIew(generics.RetrieveAPIView):
+class ProductRetriveAPIView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     authentication_classes = [JWTAuthentication]

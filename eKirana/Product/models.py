@@ -1,5 +1,6 @@
 from sre_constants import CHCODES
 from django.db import models
+
 # Create your models here.
 QTY_TYPE = (
     (0, "Kg"), (1, "Litre"), (3, "Piece")

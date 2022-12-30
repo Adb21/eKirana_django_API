@@ -1,4 +1,4 @@
-from .serializers import ShopInventorySerializer, ShopSerializer,InventorySummarySerializer ,get_Userid,getUserType,getShop
+from .serializers import ChangeOrderStatusSerializer, ShopInventorySerializer, ShopSerializer,InventorySummarySerializer, checkInventoryID ,get_Userid,getUserType,getShop
 from rest_framework.filters import SearchFilter,OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticatedOrReadOnly,IsAuthenticated
@@ -77,11 +77,32 @@ class ShopInventoryAPIView(generics.GenericAPIView):
         order = Shop_OrderInventory.objects.filter(Seller=shop)
         print(order)
         filter_backends = self.filter_queryset(order)
-        serializer = InventorySummarySerializer(order,many=True)
+        serializer = InventorySummarySerializer(filter_backends,many=True)
         page = self.paginate_queryset(serializer.data)
         return self.get_paginated_response(page)
-        # return Response(
-        #     {
-        #         "orders": serializer.data,
-        #     },status=status.HTTP_200_OK 
-        # )
+
+
+
+class ChangeOrderStatusAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self,request,pk=None):
+        id = pk
+        if not (int(id) == request.data["id"]):
+            return Response({"Error":"Invalid Invetory ID"},status=status.HTTP_200_OK )
+        if checkInventoryID(id):
+            uid = get_Userid(request)
+            utype = getUserType(uid)
+            if utype == 0:
+                return Response({"Error":"User is Not Seller"},status=status.HTTP_200_OK )
+            
+            serializer  = ChangeOrderStatusSerializer(data=request.data,context={ 'request': self.request })
+            if serializer.is_valid():
+                sts = serializer.save()
+                if sts:
+                    return Response(
+                        {
+                            "Message":"Changed status Successfully to "+str(sts),
+                        },status=status.HTTP_202_ACCEPTED
+                    )
+            return Response({"Error":serializer.errors},status=status.HTTP_400_BAD_REQUEST)
